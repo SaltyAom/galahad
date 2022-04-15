@@ -5,7 +5,7 @@ const readTokenSession = (token: string): string => token.slice(0, 21)
 
 const readToken = (token: string): string[] => [
     readTokenSession(token),
-    token.slice(22, token.length)[0]
+    token.slice(22, token.length + 1)
 ]
 
 export const refreshToken = async (id: number, previousToken: string) => {
