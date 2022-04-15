@@ -9,7 +9,7 @@ import cookie from 'fastify-cookie'
 
 import { resolve } from 'path'
 
-import { auth, base } from '@modules'
+import { auth, base, favorite } from '@modules'
 import { run, mutateAuthHook } from '@services'
 
 const app = fastify()
@@ -27,8 +27,11 @@ const main = () =>
         .register(auth, {
             prefix: '/auth'
         })
+        .register(favorite, {
+            prefix: '/favorite'
+        })
         .register(base)
-        .listen(8080, '0.0.0.0', (error, address) => {
+        .listen(process.env.PORT ?? 8080, '0.0.0.0', (error, address) => {
             if (error) return console.error(error)
 
             console.log(`Running at ${address}`)

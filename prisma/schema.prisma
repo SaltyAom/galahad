@@ -21,8 +21,10 @@ model User {
 }
 
 model Favorite {
-  id        Int       @id @db.UnsignedMediumInt
+  id        Int       @db.UnsignedMediumInt
   created   DateTime  @default(now())
-  uid       String    @db.Char(25)
+  uid       String    @db.Char(32)
   user      User      @relation(fields: [uid], references: [id])
+
+  @@id([id, uid])
 }

@@ -21,7 +21,21 @@ export const refreshToken = async ({
 export const verifyToken = async (accessToken: string) => {
     const [token, id] = accessToken.split(',')
 
-    const exists = await redis.sismember(`ac:${id}`, token)
+    const exists = await redis.sismember(`a:${id}`, token)
 
     return { id, exists }
+}
+
+export const removeToken = async ({
+    id,
+    previous
+}: {
+    id: string
+    previous: string
+}) => {
+    const key = `a:${id}`
+
+    const [token] = previous.split(',')
+
+    return !!await redis.srem(key, 1, token)
 }

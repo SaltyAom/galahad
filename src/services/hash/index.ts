@@ -4,10 +4,8 @@ import type { Options } from 'argon2'
 if (
     typeof process.env.salt === 'undefined' ||
     typeof process.env.pepper === 'undefined'
-) {
-    console.log('Salt and pepper is required')
-    process.exit(1)
-}
+)
+    throw new Error('Salt and pepper is required')
 
 const salt = process.env.salt
 const fixedPepper = process.env.pepper

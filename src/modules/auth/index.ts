@@ -1,6 +1,11 @@
 import type { FastifyPluginCallback } from 'fastify'
 
-import { authGuardHook, refreshToken, validateSchema } from '@services'
+import {
+    authGuardHook,
+    refreshToken,
+    removeToken,
+    validateSchema
+} from '@services'
 import { signUp, signIn, changePassword } from './services'
 
 import { signUpSchema, signInSchema, changePasswordSchema } from './models'
@@ -36,7 +41,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             if (user instanceof Error)
                 return res.status(403).send({ error: user.message })
 
-            const { id, ...rest } = user
+            const { id, ...data } = user
             const token = await refreshToken({
                 id,
                 previous: accessToken
@@ -46,14 +51,10 @@ const auth: FastifyPluginCallback = (app, _, done) => {
 
             res.setCookie('accessToken', newToken, {
                 httpOnly: true,
-                sameSite: true,
                 path: '/'
             })
 
-            return {
-                ...rest,
-                token: newToken
-            }
+            return data
         }
     )
 
@@ -68,6 +69,27 @@ const auth: FastifyPluginCallback = (app, _, done) => {
                 return res.status(403).send({ error: user.message })
 
             return user
+        }
+    )
+
+    app.post(
+        '/signout',
+        {
+            preHandler: [authGuardHook]
+        },
+        async ({ userId, cookies: { accessToken } }, res) => {
+            if (!userId || !accessToken) return new Error('Already signed out')
+
+            const removed = await removeToken({
+                id: userId,
+                previous: accessToken
+            })
+
+            res.unsignCookie('accessToken')
+
+            if (!removed) return new Error('Already signed out')
+
+            return 'Signed out'
         }
     )
 

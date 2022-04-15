@@ -12,12 +12,6 @@ export const signUp = async ({ username, password, email }: SignUpInput) => {
             }
         })
     } catch (err) {
-        console.log(err)
-        console.log({
-            username,
-            password: await hash(password, username),
-            email
-        })
         return new Error('Something went wrong')
     }
 }
