@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN yarn build
+RUN pnpm build
 
 # * ====================
 FROM node:16-alpine3.14 as modules
@@ -22,7 +22,10 @@ RUN npm install -g pnpm
 
 COPY package.json .
 COPY pnpm-lock.yaml .
+COPY prisma prisma
 
+RUN pnpm install --frozen-lockfile
+RUN pnpm prisma generate
 RUN pnpm install --frozen-lockfile --production
 
 # * ====================
