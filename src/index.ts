@@ -20,7 +20,9 @@ const main = () =>
         .register(helmet)
         .register(cookie)
         .register(cors, {
-            'origin': ['localhost:3000', 'hifmin.app'],
+            origin: [/localhost:3000$/, /hifumin.app$/],
+            allowedHeaders: '*',
+            credentials: true
         })
         .register(staticPlugin, {
             root: resolve('./public')
