@@ -6,14 +6,14 @@ import { verifyToken } from '@services'
 
 import type { ObjectSchema } from 'fluent-json-schema'
 
-export const mutateAuthHook: onRequestHookHandler = async (req) => {
+export const mutateAuthHook: onRequestHookHandler = async (req, res) => {
     const {
         cookies: { accessToken }
     } = req
     if (!accessToken) return
 
     const { id, exists } = await verifyToken(accessToken)
-    if (!exists) return
+    if (!exists) return res.unsignCookie('accessToken')
 
     req.auth = true
     req.userId = +id

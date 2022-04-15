@@ -11,34 +11,48 @@ import cors from 'fastify-cors'
 import { resolve } from 'path'
 
 import { auth, base, favorite } from '@modules'
-import { mutateAuthHook } from '@services'
+import { mutateAuthHook, prisma } from '@services'
 
 const app = fastify()
 
-app.register(helmet)
-    .register(cookie)
-    .register(cors, {
-        origin: [/localhost:3000$/, /hifumin.app$/],
-        methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type'],
-        credentials: true,
-        preflight: true
-    })
-    .register(staticPlugin, {
-        root: resolve('./public')
-    })
-    .decorateRequest('userId', null)
-    .decorateRequest('auth', false)
-    .addHook('onRequest', mutateAuthHook)
-    .register(auth, {
-        prefix: '/auth'
-    })
-    .register(favorite, {
-        prefix: '/favorite'
-    })
-    .register(base)
-    .listen(process.env.PORT ?? 8080, '0.0.0.0', (error, address) => {
-        if (error) return console.error(error)
+const main = async () => {
+    await prisma.$connect()
 
-        console.log(`Running at ${address}`)
-    })
+    app.register(helmet)
+        .register(cookie)
+        .register(cors, {
+            origin: [/localhost:3000$/, /hifumin.app$/],
+            methods: [
+                'GET',
+                'HEAD',
+                'PUT',
+                'PATCH',
+                'POST',
+                'DELETE',
+                'OPTIONS'
+            ],
+            allowedHeaders: ['Content-Type'],
+            credentials: true,
+            preflight: true
+        })
+        .register(staticPlugin, {
+            root: resolve('./public')
+        })
+        .decorateRequest('userId', null)
+        .decorateRequest('auth', false)
+        .addHook('onRequest', mutateAuthHook)
+        .register(auth, {
+            prefix: '/auth'
+        })
+        .register(favorite, {
+            prefix: '/favorite'
+        })
+        .register(base)
+        .listen(process.env.PORT ?? 8080, '0.0.0.0', (error, address) => {
+            if (error) return console.error(error)
+
+            console.log(`Running at ${address}`)
+        })
+}
+
+main()
