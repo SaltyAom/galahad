@@ -21,8 +21,9 @@ const main = () =>
         .register(cookie)
         .register(cors, {
             origin: [/localhost:3000$/, /hifumin.app$/],
-            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: 'Content-Type'
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+            allowedHeaders: 'Content-Type',
+            preflight: true
         })
         .register(staticPlugin, {
             root: resolve('./public')
