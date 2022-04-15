@@ -21,7 +21,8 @@ const main = () =>
         .register(cookie)
         .register(cors, {
             origin: [/localhost:3000$/, /hifumin.app$/],
-            allowedHeaders: '*',
+            methods: '*',
+            allowedHeaders: 'Content-Type',
             credentials: true
         })
         .register(staticPlugin, {
