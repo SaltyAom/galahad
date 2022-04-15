@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "target": "ES2019",
+        "module": "CommonJS",
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
+        "strict": true,
+        "moduleResolution": "node",
+        "baseUrl": "src",
+        "paths": {
+            "@modules": ["modules/index.ts"],
+            "@modules/*": ["modules/*"],
+            "@services": ["services/index.ts"],
+            "@services/*": ["services/*"],
+            "~": ["index.ts"],
+            "~/*": ["*"]
+        },
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "ts-node": {
+        "files": true
+    }
+}

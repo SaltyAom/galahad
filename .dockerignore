@@ -1,0 +1,4 @@
+.DS_Store
+.swc
+node_modules
+.env
