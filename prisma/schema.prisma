@@ -13,9 +13,9 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String      @db.TinyText
-  username        String  @unique @db.VarChar(32)
+  id          Int         @id @default(autoincrement())
+  email       String      @unique
+  username    String      @unique @db.VarChar(32)
   password    String      @db.Char(44)
   favorites   Favorite[]
 }

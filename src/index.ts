@@ -6,6 +6,7 @@ import fastify from 'fastify'
 import helmet from 'fastify-helmet'
 import staticPlugin from 'fastify-static'
 import cookie from 'fastify-cookie'
+import cors from 'fastify-cors'
 
 import { resolve } from 'path'
 
@@ -18,6 +19,9 @@ const main = () =>
     app
         .register(helmet)
         .register(cookie)
+        .register(cors, {
+            'origin': ['localhost:3000', 'hifmin.app'],
+        })
         .register(staticPlugin, {
             root: resolve('./public')
         })
