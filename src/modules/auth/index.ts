@@ -6,7 +6,7 @@ import {
     removeToken,
     validateSchema
 } from '@services'
-import { signUp, signIn, changePassword } from './services'
+import { signUp, signIn, changePassword, refresh } from './services'
 
 import { signUpSchema, signInSchema, changePasswordSchema } from './models'
 
@@ -51,6 +51,14 @@ const auth: FastifyPluginCallback = (app, _, done) => {
 
             return username
         }
+    )
+
+    app.get(
+        '/refresh',
+        {
+            preHandler: authGuardHook
+        },
+        async ({ userId }) => await refresh(userId!)
     )
 
     app.patch<ChangePasswordHandler>(

@@ -22,8 +22,7 @@ const main = () =>
         .register(cors, {
             origin: [/localhost:3000$/, /hifumin.app$/],
             methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: 'Content-Type',
-            credentials: true
+            allowedHeaders: 'Content-Type'
         })
         .register(staticPlugin, {
             root: resolve('./public')

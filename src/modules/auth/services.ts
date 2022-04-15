@@ -40,6 +40,21 @@ export const signIn = async ({ username, password }: SignUpInput) => {
     }
 }
 
+export const refresh = async (userId: number) => {
+    const user = await prisma.user.findUnique({
+        select: {
+            username: true,
+        },
+        where: {
+            id: userId
+        }
+    })
+
+    if (!user) return new Error('Somethign went wrong')
+
+    return user.username
+}
+
 export const changePassword = async ({
     userId,
     password,
