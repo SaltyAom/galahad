@@ -46,7 +46,9 @@ const auth: FastifyPluginCallback = (app, _, done) => {
 
             res.setCookie('accessToken', newToken, {
                 httpOnly: true,
-                path: '/'
+                path: '/',
+                sameSite: 'none',
+                secure: true
             })
 
             return username
