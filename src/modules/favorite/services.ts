@@ -13,7 +13,6 @@ export const addFavorite = async (uid: number, id: number) => {
             }
         })
     } catch (err) {
-        console.log(err)
         return new Error('Something went wrong')
     }
 }

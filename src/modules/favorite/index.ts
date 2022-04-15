@@ -20,10 +20,8 @@ const base: FastifyPluginCallback = (app, _, done) => {
             if (!isNHentai(id)) return 'Invalid id'
 
             const favorite = await addFavorite(userId!, +id)
-            if (favorite instanceof Error) {
-                console.log(favorite)
+            if (favorite instanceof Error)
                 return res.status(502).send('Something went wrong')
-            }
 
             return id
         }
@@ -67,7 +65,8 @@ const base: FastifyPluginCallback = (app, _, done) => {
         async ({ userId, params: { page: stringifiedPage } }, res) => {
             const page = +stringifiedPage
 
-            if (!page || Number.isNaN(page) || page <= 0 || page >= 10e6) return 'Invalid page'
+            if (!page || Number.isNaN(page) || page <= 0 || page >= 10e6)
+                return 'Invalid page'
 
             const favorites = await getFavoriteByPage(userId!, +page)
             if (favorites instanceof Error)

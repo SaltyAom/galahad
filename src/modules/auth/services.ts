@@ -12,7 +12,6 @@ export const signUp = async ({ username, password, email }: SignUpInput) => {
             }
         })
     } catch (err) {
-        console.log(err)
         return new Error('Something went wrong')
     }
 }
