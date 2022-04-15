@@ -2,7 +2,7 @@ import type { RouteShorthandMethod } from 'fastify'
 
 export interface NewFavoriteHandler extends RouteShorthandMethod {
     Params: {
-        id: string
+        id: number
     }
 }
 

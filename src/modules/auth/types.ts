@@ -8,7 +8,7 @@ export interface SignUpHandler extends RouteShorthandMethod {
 }
 
 export interface ChangePasswordInput extends Pick<User, 'password'> {
-    userId: string
+    userId: number
     newPassword: string
 }
 

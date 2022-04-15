@@ -4,6 +4,6 @@ import type fastify, { FastifyRequest } from 'fastify'
 declare module 'fastify' {
     interface FastifyRequest {
         auth: boolean
-        userId: string | null
+        userId: number | null
     }
 }

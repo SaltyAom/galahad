@@ -1,41 +1,32 @@
 import { nanoid } from 'nanoid'
 import { redis } from '@services'
 
-export const refreshToken = async ({
-    id,
-    previous: previousToken
-}: {
-    id: string
-    previous: string
-}) => {
+const readTokenSession = (token: string): string => token.slice(0, 21)
+
+const readToken = (token: string): string[] => [
+    readTokenSession(token),
+    token.slice(22, token.length)[0]
+]
+
+export const refreshToken = async (id: number, previousToken: string) => {
+    const accessToken = nanoid()
     const key = `a:${id}`
 
-    const accessToken = nanoid()
     await redis.sadd(key, accessToken)
-
     if (previousToken) await redis.srem(key, 1, previousToken)
 
     return accessToken
 }
 
 export const verifyToken = async (accessToken: string) => {
-    const [token, id] = accessToken.split(',')
-
+    const [token, id] = readToken(accessToken)
     const exists = await redis.sismember(`a:${id}`, token)
 
     return { id, exists }
 }
 
-export const removeToken = async ({
-    id,
-    previous
-}: {
-    id: string
-    previous: string
-}) => {
-    const key = `a:${id}`
+export const removeToken = async (id: number, previous: string) => {
+    const token = readTokenSession(previous)
 
-    const [token] = previous.split(',')
-
-    return !!await redis.srem(key, 1, token)
+    return !!(await redis.srem(`a:${id}`, 1, token))
 }

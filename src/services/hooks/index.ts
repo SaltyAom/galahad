@@ -16,7 +16,7 @@ export const mutateAuthHook: onRequestHookHandler = async (req) => {
     if (!exists) return
 
     req.auth = true
-    req.userId = id
+    req.userId = +id
 }
 
 export const authGuardHook: onRequestHookHandler = (req, res, done) => {

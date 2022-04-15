@@ -20,8 +20,10 @@ const base: FastifyPluginCallback = (app, _, done) => {
             if (!isNHentai(id)) return 'Invalid id'
 
             const favorite = await addFavorite(userId!, +id)
-            if (favorite instanceof Error)
+            if (favorite instanceof Error) {
+                console.log(favorite)
                 return res.status(502).send('Something went wrong')
+            }
 
             return id
         }

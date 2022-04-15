@@ -13,7 +13,7 @@ datasource db {
 }
 
 model User {
-  id          String      @id @default(cuid()) @db.Char(32)
+  id          Int      @id @default(autoincrement())
   email       String      @db.TinyText
   username        String  @unique @db.VarChar(32)
   password    String      @db.Char(44)
@@ -23,7 +23,7 @@ model User {
 model Favorite {
   id        Int       @db.UnsignedMediumInt
   created   DateTime  @default(now())
-  uid       String    @db.Char(32)
+  uid       Int
   user      User      @relation(fields: [uid], references: [id])
 
   @@id([id, uid])

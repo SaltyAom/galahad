@@ -4,7 +4,7 @@ import { prisma } from '@services'
 export const isNHentai = (id: string | number) =>
     `${id}`.length <= 7 && !Number.isNaN(+id)
 
-export const addFavorite = async (uid: string, id: number) => {
+export const addFavorite = async (uid: number, id: number) => {
     try {
         return await prisma.favorite.create({
             data: {
@@ -13,11 +13,12 @@ export const addFavorite = async (uid: string, id: number) => {
             }
         })
     } catch (err) {
+        console.log(err)
         return new Error('Something went wrong')
     }
 }
 
-export const removeFavorite = async (uid: string, id: number) => {
+export const removeFavorite = async (uid: number, id: number) => {
     try {
         return await prisma.favorite.delete({
             where: {
@@ -34,7 +35,7 @@ export const removeFavorite = async (uid: string, id: number) => {
 
 const batchSize = 25
 
-export const getFavoriteByPage = async (uid: string, page = 1) => {
+export const getFavoriteByPage = async (uid: number, page = 1) => {
     try {
         return await prisma.favorite.findMany({
             select: {

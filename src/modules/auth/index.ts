@@ -25,9 +25,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
 
             const { username } = user
 
-            return {
-                username
-            }
+            return username
         }
     )
 
@@ -41,20 +39,17 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             if (user instanceof Error)
                 return res.status(403).send({ error: user.message })
 
-            const { id, ...data } = user
-            const token = await refreshToken({
-                id,
-                previous: accessToken
-            })
+            const { id, username } = user
+            const token = await refreshToken(id, accessToken)
 
-            const newToken = `${token},${id}`
+            const newToken = `${token}:${id}`
 
             res.setCookie('accessToken', newToken, {
                 httpOnly: true,
                 path: '/'
             })
 
-            return data
+            return username
         }
     )
 
@@ -68,7 +63,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             if (user instanceof Error)
                 return res.status(403).send({ error: user.message })
 
-            return user
+            return user.username
         }
     )
 
@@ -80,11 +75,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         async ({ userId, cookies: { accessToken } }, res) => {
             if (!userId || !accessToken) return new Error('Already signed out')
 
-            const removed = await removeToken({
-                id: userId,
-                previous: accessToken
-            })
-
+            const removed = await removeToken(userId, accessToken)
             res.unsignCookie('accessToken')
 
             if (!removed) return new Error('Already signed out')
