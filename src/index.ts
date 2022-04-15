@@ -21,7 +21,7 @@ const main = () =>
         .register(cookie)
         .register(cors, {
             origin: [/localhost:3000$/, /hifumin.app$/],
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
             allowedHeaders: 'Content-Type',
             credentials: true
         })
