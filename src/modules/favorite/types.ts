@@ -12,7 +12,7 @@ export interface Favorite {
 
 export interface NewFavoriteHandler extends RouteShorthandMethod {
     Params: {
-        id: number
+        id: string
     }
 }
 

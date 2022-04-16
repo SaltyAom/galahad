@@ -6,12 +6,29 @@ import {
     addFavorite,
     removeFavorite,
     getFavoriteByPage,
-    getFavoriteData
+    getFavoriteData,
+    isFavorite
 } from './services'
 
 import type { GetFavoriteHandler, NewFavoriteHandler } from './types'
 
 const base: FastifyPluginCallback = (app, _, done) => {
+    app.get<NewFavoriteHandler>(
+        '/h/:id',
+        {
+            preHandler: [authGuardHook]
+        },
+        async ({ userId, params: { id } }, res) => {
+            if (!isNHentai(id)) return 'Invalid id'
+
+            const isFavorited = await isFavorite(userId!, +id)
+            if (isFavorited instanceof Error)
+                return res.status(502).send('Something went wrong')
+
+            return isFavorited
+        }
+    )
+
     app.put<NewFavoriteHandler>(
         '/h/:id',
         {

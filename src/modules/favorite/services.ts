@@ -7,6 +7,24 @@ import type { FavoriteRequest, Favorite } from './types'
 export const isNHentai = (id: string | number) =>
     `${id}`.length <= 7 && !Number.isNaN(+id)
 
+export const isFavorite = async (
+    uid: number,
+    id: number
+): Promise<boolean | Error> => {
+    try {
+        return !!(await prisma.favorite.count({
+            where: {
+                id,
+                uid
+            }
+        }))
+    } catch (err) {
+        console.log(err)
+
+        return new Error('Something went wrong')
+    }
+}
+
 export const addFavorite = async (
     uid: number,
     id: number
