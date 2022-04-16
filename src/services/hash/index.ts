@@ -33,4 +33,4 @@ export const verify = async (
     hashValue: string,
     value: string,
     pepper: string
-) => !(Buffer.from(hashValue).compare(await rawHash(value, pepper)) + 1)
+) => hashValue === (await hash(value, pepper))
