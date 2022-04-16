@@ -37,7 +37,10 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         async ({ body, cookies: { accessToken } }, res) => {
             const user = await signIn(body)
             if (user instanceof Error)
-                return res.status(403).send({ error: user.message })
+                // ? Delay the response to avoid brute force attacks
+                return setTimeout(() => {
+                    res.status(403).send({ error: user.message })
+                }, 750)
 
             const { id, username } = user
             const token = await refreshToken(id, accessToken)
