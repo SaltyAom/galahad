@@ -19,8 +19,6 @@ export const isFavorite = async (
             }
         }))
     } catch (err) {
-        console.log(err)
-
         return new Error('Something went wrong')
     }
 }
@@ -75,6 +73,9 @@ export const getFavoriteByPage = async (
             skip: batchSize * (page - 1),
             where: {
                 uid
+            },
+            orderBy: {
+                created: 'desc'
             }
         })
     } catch (err) {
@@ -93,14 +94,16 @@ export const getFavoriteData = async (favorites: Favorite[]) => {
     )
 
     if (hentais instanceof Error || Array.isArray(hentais))
-        return favorites.map(({ id }) => ({
+        return favorites.map(({ id }, index) => ({
             id,
+            created: favorites[index]?.created,
             success: false,
             data: null
         }))
 
     return hentais.nhql.multiple.data.map((datum, index) => ({
         id: favorites[index].id,
+        created: favorites[index]?.created,
         ...datum
     }))
 }
