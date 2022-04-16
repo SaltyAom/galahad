@@ -1,6 +1,6 @@
 import gql, { client } from '@saltyaom/gq'
 
-client.config('https://api.hifumin.app/v1/graphql')
+client.config('https://api.hifumin.app')
 
 export { getFavoriteHentais } from './query'
 export type {
