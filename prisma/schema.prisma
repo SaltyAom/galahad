@@ -18,6 +18,7 @@ model User {
   username    String      @unique @db.VarChar(32)
   password    String      @db.Char(44)
   favorites   Favorite[]
+  profile     Profile?
 }
 
 model Favorite {
@@ -27,4 +28,10 @@ model Favorite {
   user      User      @relation(fields: [uid], references: [id])
 
   @@id([id, uid])
+}
+
+model Profile {
+  id        Int       @id
+  joined    DateTime  @default(now())
+  user      User      @relation(fields: [id], references: [id])
 }

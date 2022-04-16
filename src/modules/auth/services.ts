@@ -8,7 +8,10 @@ export const signUp = async ({ username, password, email }: SignUpInput) => {
             data: {
                 username,
                 password: await hash(password, username),
-                email
+                email,
+                profile: {
+                    create: {}
+                }
             }
         })
     } catch (err) {
@@ -43,7 +46,7 @@ export const signIn = async ({ username, password }: SignUpInput) => {
 export const refresh = async (userId: number) => {
     const user = await prisma.user.findUnique({
         select: {
-            username: true,
+            username: true
         },
         where: {
             id: userId
