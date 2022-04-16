@@ -2,7 +2,13 @@ import { prisma, hash, verify } from '@services'
 
 import type { ChangePasswordInput, SignUpInput } from './types'
 
-export const signUp = async ({ username, password, email }: SignUpInput) => {
+export const signUp = async ({
+    username: name,
+    password,
+    email
+}: SignUpInput) => {
+    const username = name.toLowerCase()
+
     try {
         return await prisma.user.create({
             data: {
@@ -19,7 +25,9 @@ export const signUp = async ({ username, password, email }: SignUpInput) => {
     }
 }
 
-export const signIn = async ({ username, password }: SignUpInput) => {
+export const signIn = async ({ username: name, password }: SignUpInput) => {
+    const username = name.toLowerCase()
+
     const user = await prisma.user.findUnique({
         select: {
             id: true,
