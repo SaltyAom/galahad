@@ -1,5 +1,15 @@
 import type { RouteShorthandMethod } from 'fastify'
 
+export interface FavoriteRequest {
+    id: number
+    uid: number
+}
+
+export interface Favorite {
+    id: number
+    created: Date
+}
+
 export interface NewFavoriteHandler extends RouteShorthandMethod {
     Params: {
         id: number
