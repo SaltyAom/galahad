@@ -6,7 +6,7 @@ import {
     removeToken,
     validateSchema
 } from '@services'
-import { signUp, signIn, changePassword, refresh } from './services'
+import { signUp, signIn, changePassword, refresh, delay } from './services'
 
 import { signUpSchema, signInSchema, changePasswordSchema } from './models'
 
@@ -36,11 +36,11 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         },
         async ({ body, cookies: { accessToken } }, res) => {
             const user = await signIn(body)
-            if (user instanceof Error)
-                // ? Delay the response to avoid brute force attacks
-                return setTimeout(() => {
-                    res.status(403).send({ error: user.message })
-                }, 750)
+            if (user instanceof Error) {
+                await delay(750)
+
+                return res.status(403).send({ error: user.message })
+            }
 
             const { id, username } = user
             const token = await refreshToken(id, accessToken)
