@@ -21,7 +21,7 @@ const main = async () => {
     app.register(helmet)
         .register(cookie)
         .register(cors, {
-            origin: [/localhost:3000$/, /hifumin.app$/],
+            origin: [/localhost:3000$/, /hifumin.app$/, /hifumin.pages.dev$/],
             methods: [
                 'GET',
                 'HEAD',
