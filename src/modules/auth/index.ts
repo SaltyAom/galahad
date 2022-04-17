@@ -47,11 +47,15 @@ const auth: FastifyPluginCallback = (app, _, done) => {
 
             const newToken = `${token}:${id}`
 
+            const expires = new Date()
+            expires.setFullYear(expires.getFullYear() + 1)
+
             res.setCookie('accessToken', newToken, {
                 httpOnly: true,
                 path: '/',
                 sameSite: 'none',
-                secure: true
+                secure: true,
+                expires: new Date()
             })
 
             return username
