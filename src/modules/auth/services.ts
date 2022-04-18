@@ -61,7 +61,7 @@ export const refresh = async (userId: number) => {
         }
     })
 
-    if (!user) return new Error('Somethign went wrong')
+    if (!user) return new Error("User doesn't existed somehow")
 
     return user.username
 }

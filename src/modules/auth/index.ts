@@ -68,7 +68,23 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         {
             preHandler: authGuardHook
         },
-        async ({ userId }) => await refresh(userId!)
+        async ({ userId, cookies: { accessToken } }, res) => {
+            const username = refresh(userId!)
+
+            const expires = new Date(
+                new Date().setFullYear(new Date().getFullYear() + 1)
+            )
+
+            res.setCookie('accessToken', accessToken, {
+                httpOnly: true,
+                path: '/',
+                sameSite: 'none',
+                secure: true,
+                expires
+            })
+
+            return await username
+        }
     )
 
     app.patch<ChangePasswordHandler>(

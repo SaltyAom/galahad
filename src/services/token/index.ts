@@ -12,6 +12,15 @@ export const refreshToken = async (id: number, previousToken: string) => {
     const accessToken = nanoid()
     const key = `a:${id}`
 
+    try {
+        const totalSession = await redis.scard(key)
+
+        // ? Actually, don't do this
+        if (totalSession >= 15) await redis.del(key)
+    } catch (_) {
+        // Not Empty
+    }
+
     await redis.sadd(key, accessToken)
     if (previousToken) await redis.srem(key, 1, previousToken)
 
