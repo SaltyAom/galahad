@@ -39,7 +39,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             if (user instanceof Error) {
                 await delay(750)
 
-                return res.status(403).send({ error: user.message })
+                return res.status(401).send({ error: user.message })
             }
 
             const { id, username } = user
@@ -95,7 +95,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         async ({ body, userId }, res) => {
             const user = await changePassword({ ...body, userId: userId! })
             if (user instanceof Error)
-                return res.status(403).send({ error: user.message })
+                return res.status(401).send({ error: user.message })
 
             return user.username
         }
