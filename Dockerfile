@@ -26,7 +26,7 @@ COPY prisma prisma
 
 RUN pnpm install --frozen-lockfile
 RUN pnpm prisma generate
-RUN pnpm install --frozen-lockfile --production
+RUN pnpm prune --production
 
 # * ====================
 FROM node:16-alpine3.14 as main

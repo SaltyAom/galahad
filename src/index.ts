@@ -1,5 +1,4 @@
-import env from 'dotenv'
-env.config()
+import 'dotenv/config'
 
 import fastify from 'fastify'
 

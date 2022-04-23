@@ -24,6 +24,7 @@
             "compress": true
         }
     },
+    "minify": true,
     "env": {
         "targets": {
             "node": 14
