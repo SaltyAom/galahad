@@ -2,7 +2,6 @@ lockfileVersion: 5.3
 
 specifiers:
   '@prisma/client': ^3.12.0
-  '@saltyaom/gq': 1.1.7
   '@swc/cli': ^0.1.57
   '@swc/core': ^1.2.170
   '@swc/jest': ^0.2.20
@@ -33,7 +32,6 @@ specifiers:
 
 dependencies:
   '@prisma/client': 3.12.0_prisma@3.12.0
-  '@saltyaom/gq': 1.1.7
   argon2: 0.28.5
   dotenv: 14.3.2
   fastify: 3.28.0
@@ -738,14 +736,6 @@ packages:
     resolution: {integrity: sha512-zULjkN8yhzS7B3yeEz4aIym4E2w1ChrV12i14pht3ePFufvsAvBSoZ+tuXMvfSoNTgBS5E4bolRzLbMmbwkkMQ==}
     requiresBuild: true
     dev: true
-
-  /@saltyaom/gq/1.1.7:
-    resolution: {integrity: sha512-Qa9m7h5e0uceaPUr8lMlLuYkf+vmA1MF67cIGqJcYtsgmhO/0yJRYO4dF0FGwAnhx/wkUClcdXOVPUySgr87qw==}
-    dependencies:
-      isomorphic-unfetch: 3.1.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
 
   /@sindresorhus/is/0.14.0:
     resolution: {integrity: sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==}
@@ -2729,15 +2719,6 @@ packages:
     resolution: {integrity: sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=}
     dev: true
 
-  /isomorphic-unfetch/3.1.0:
-    resolution: {integrity: sha512-geDJjpoZ8N0kWexiwkX8F9NkTsXhetLPVbZFQ+JTW239QNOwvB0gniuR1Wc6f0AMTn7/mFGyXvHTifrCp/GH8Q==}
-    dependencies:
-      node-fetch: 2.6.7
-      unfetch: 4.2.0
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /istanbul-lib-coverage/3.2.0:
     resolution: {integrity: sha512-eOeJ5BHCmHYvQK7xt9GkdHuzuCGS1Y6g9Gvnx3Ym33fz/HpLRYxiS0wHNr+m/MBC8B647Xt608vCDEvhl9c6Mw==}
     engines: {node: '>=8'}
@@ -4483,10 +4464,6 @@ packages:
   /undefsafe/2.0.5:
     resolution: {integrity: sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==}
     dev: true
-
-  /unfetch/4.2.0:
-    resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}
-    dev: false
 
   /unique-string/2.0.0:
     resolution: {integrity: sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==}

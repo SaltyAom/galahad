@@ -1,7 +1,6 @@
-import { prisma, gql, getFavoriteHentais } from '@services'
+import { prisma } from '@services'
 
-import type { GetFavoriteHentais, GetFavoriteHentaisVariable } from '@services'
-import type { FavoriteRequest, Favorite } from './types'
+import type { FavoriteRequest } from './types'
 
 // In the future, code might exceed 6 digits however it would take atleast 10 years to reach 8 digits.
 export const isNHentai = (id: string | number) =>
@@ -62,12 +61,11 @@ const batchSize = 25
 export const getFavoriteByPage = async (
     uid: number,
     page = 1
-): Promise<Favorite[] | Error> => {
+): Promise<number[] | Error> => {
     try {
-        return await prisma.favorite.findMany({
+        const favorites = await prisma.favorite.findMany({
             select: {
-                id: true,
-                created: true
+                id: true
             },
             take: batchSize,
             skip: batchSize * (page - 1),
@@ -78,32 +76,10 @@ export const getFavoriteByPage = async (
                 created: 'desc'
             }
         })
+
+        return favorites.map(({ id }) => id)
     } catch (err) {
         return new Error('Something went wrong')
     }
 }
 
-export const getFavoriteData = async (favorites: Favorite[]) => {
-    const hentais = await gql<GetFavoriteHentais, GetFavoriteHentaisVariable>(
-        getFavoriteHentais,
-        {
-            variables: {
-                id: favorites.map(({ id }) => id)
-            }
-        }
-    )
-
-    if (hentais instanceof Error || Array.isArray(hentais))
-        return favorites.map(({ id }, index) => ({
-            id,
-            created: favorites[index]?.created,
-            success: false,
-            data: null
-        }))
-
-    return hentais.nhql.multiple.data.map((datum, index) => ({
-        id: favorites[index].id,
-        created: favorites[index]?.created,
-        ...datum
-    }))
-}

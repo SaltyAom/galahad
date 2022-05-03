@@ -7,7 +7,6 @@ export interface FavoriteRequest {
 
 export interface Favorite {
     id: number
-    created: Date
 }
 
 export interface NewFavoriteHandler extends RouteShorthandMethod {

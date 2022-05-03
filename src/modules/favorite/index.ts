@@ -6,7 +6,6 @@ import {
     addFavorite,
     removeFavorite,
     getFavoriteByPage,
-    getFavoriteData,
     isFavorite
 } from './services'
 
@@ -71,7 +70,7 @@ const base: FastifyPluginCallback = (app, _, done) => {
             if (favorites instanceof Error)
                 return res.status(502).send('Something went wrong')
 
-            return await getFavoriteData(favorites)
+            return favorites
         }
     )
 
@@ -86,15 +85,11 @@ const base: FastifyPluginCallback = (app, _, done) => {
             if (!page || Number.isNaN(page) || page <= 0 || page >= 10e6)
                 return 'Invalid page'
 
-            // ? Ping the server to startup from serverless coldstart
-            // await isn't require because it's a side-effect
-            fetch('https://api.hifumin.app')
-
             const favorites = await getFavoriteByPage(userId!, +page)
             if (favorites instanceof Error)
                 return res.status(502).send('Something went wrong')
 
-            return await getFavoriteData(favorites)
+            return favorites
         }
     )
 
