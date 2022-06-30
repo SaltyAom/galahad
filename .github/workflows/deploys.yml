@@ -1,0 +1,57 @@
+name: deploys
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    env:
+      APP_NAME: galahad
+      IMAGE_NAME: ghcr.io/saltyaom/galahad
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: saltyaom
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - uses: pnpm/action-setup@v2.0.1
+      with:
+        version: 6.0.2
+        run_install: |
+          - recursive: true
+            args: [--frozen-lockfile, --strict-peer-dependencies]
+          - args: [--global, gulp, prettier, typescript]
+
+    - run: pnpm build
+
+    - name: Build Docker image
+      run: docker build -t $APP_NAME .
+
+    - name: Tag Docker image
+      run: docker tag $APP_NAME $IMAGE_NAME
+
+    - name: Push Docker image
+      run: docker push $IMAGE_NAME
+
+    - uses: deploys-app/deploys-action@v1
+      with:
+        project: galahad
+        location: gke.cluster-rcf2
+        name: galahad
+        image: ghcr.io/saltyaom/galahad
+        minReplicas: 2
+        maxReplicas: 10
+      env:
+        DEPLOYS_AUTH_USER: ${{ secrets.DEPLOYS_AUTH_USER }}
+        DEPLOYS_AUTH_PASS: ${{ secrets.DEPLOYS_AUTH_PASS }}
