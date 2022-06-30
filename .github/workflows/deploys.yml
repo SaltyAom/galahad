@@ -21,20 +21,6 @@ jobs:
         username: saltyaom
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-
-    - uses: pnpm/action-setup@v2.0.1
-      with:
-        version: 6.0.2
-        run_install: |
-          - recursive: true
-            args: [--frozen-lockfile, --strict-peer-dependencies]
-          - args: [--global, gulp, prettier, typescript]
-
-    - run: pnpm build
-
     - name: Build Docker image
       run: docker build -t $APP_NAME .
 
@@ -46,7 +32,7 @@ jobs:
 
     - uses: deploys-app/deploys-action@v1
       with:
-        project: galahad
+        project: hifumin
         location: gke.cluster-rcf2
         name: galahad
         image: ghcr.io/saltyaom/galahad
