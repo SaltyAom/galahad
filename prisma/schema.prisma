@@ -3,7 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
 }
 
 datasource db {
@@ -19,15 +19,37 @@ model User {
   password    String      @db.Char(44)
   favorites   Favorite[]
   profile     Profile?
+  collection  Collection[]
 }
 
 model Favorite {
-  id        Int       @db.UnsignedMediumInt
+  id        Int
   created   DateTime  @default(now())
   uid       Int
   user      User      @relation(fields: [uid], references: [id])
 
   @@id([id, uid])
+}
+
+model Collection {
+  id        Int                 @id @default(autoincrement()) @db.UnsignedMediumInt
+  uid       Int
+  title     String              @db.TinyText
+  detail    String              @db.TinyText
+  created   DateTime            @default(now())
+  updated   DateTime            @default(now())
+  public    Boolean             @default(false)
+  hentai    HentaiCollection[]
+  user      User                @relation(fields: [uid], references: [id])
+}
+
+model HentaiCollection {
+  order         Int         @unique @default(autoincrement())
+  id            Int
+  collectionId  Int
+  collection    Collection  @relation(fields: [collectionId], references: [id])
+
+  @@id([id, collectionId])
 }
 
 model Profile {

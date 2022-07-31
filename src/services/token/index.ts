@@ -16,7 +16,7 @@ export const refreshToken = async (id: number, previousToken: string) => {
         const totalSession = await redis.scard(key)
 
         // ? Actually, don't do this
-        if (totalSession >= 15) await redis.del(key)
+        if (totalSession >= 30) await redis.del(key)
     } catch (_) {
         // Not Empty
     }

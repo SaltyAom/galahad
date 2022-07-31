@@ -13,7 +13,7 @@ import type { GetFavoriteHandler, NewFavoriteHandler } from './types'
 
 const base: FastifyPluginCallback = (app, _, done) => {
     app.get<NewFavoriteHandler>(
-        '/h/:id',
+        '/id/:id',
         {
             preHandler: [authGuardHook]
         },
@@ -22,14 +22,16 @@ const base: FastifyPluginCallback = (app, _, done) => {
 
             const isFavorited = await isFavorite(userId!, +id)
             if (isFavorited instanceof Error)
-                return res.status(502).send('Something went wrong')
+                return res.status(502).send({
+                    error: 'Something went wrong'
+                })
 
             return isFavorited
         }
     )
 
     app.put<NewFavoriteHandler>(
-        '/h/:id',
+        '/id/:id',
         {
             preHandler: [authGuardHook]
         },
@@ -45,7 +47,7 @@ const base: FastifyPluginCallback = (app, _, done) => {
     )
 
     app.delete<NewFavoriteHandler>(
-        '/h/:id',
+        '/id/:id',
         {
             preHandler: [authGuardHook]
         },

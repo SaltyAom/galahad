@@ -1,10 +1,8 @@
 import type { onRequestHookHandler } from 'fastify'
 
-import validate from 'fluent-schema-validator'
+import validate, { type Schema } from 'fluent-schema-validator'
 
 import { verifyToken } from '@services'
-
-import type { ObjectSchema } from 'fluent-json-schema'
 
 export const mutateAuthHook: onRequestHookHandler = async (req, res) => {
     const {
@@ -29,10 +27,12 @@ export const authGuardHook: onRequestHookHandler = (req, res, done) => {
 }
 
 export const validateSchema =
-    <T = ObjectSchema>(schema: ObjectSchema): onRequestHookHandler =>
+    <T = Schema>(schema: T): onRequestHookHandler =>
     ({ body }, res, done) => {
-        if (!validate(body as T, schema))
-            return res.status(401).send({ error: 'Invalid body' })
+        const validation = validate(body as T, schema)
+
+        if (validation !== true)
+            return res.status(400).send({ error: validation.message })
 
         done()
     }

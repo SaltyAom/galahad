@@ -9,6 +9,17 @@ export const signUp = async ({
 }: SignUpInput) => {
     const username = name.toLowerCase()
 
+    const user = await prisma.user.findUnique({
+        select: {
+            id: true
+        },
+        where: {
+            username
+        }
+    })
+
+    if (user) return new Error('This username is taken')
+
     try {
         return await prisma.user.create({
             data: {

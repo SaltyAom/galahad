@@ -21,11 +21,9 @@ const auth: FastifyPluginCallback = (app, _, done) => {
         async ({ body }, res) => {
             const user = await signUp(body)
             if (user instanceof Error)
-                return res.status(401).send({ error: user.message })
+                return res.status(400).send({ error: user.message })
 
-            const { username } = user
-
-            return username
+            return user.username
         }
     )
 
@@ -39,11 +37,11 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             if (user instanceof Error) {
                 await delay(750)
 
-                return res.status(401).send({ error: user.message })
+                return res.status(400).send({ error: user.message })
             }
 
             const { id, username } = user
-            const token = await refreshToken(id, accessToken)
+            const token = await refreshToken(id, accessToken!)
 
             const newToken = `${token}:${id}`
 
@@ -69,13 +67,19 @@ const auth: FastifyPluginCallback = (app, _, done) => {
             preHandler: authGuardHook
         },
         async ({ userId, cookies: { accessToken } }, res) => {
-            const username = refresh(userId!)
+            const username = await refresh(userId!)
+
+            if (username instanceof Error) {
+                await delay(750)
+
+                return res.status(400).send({ error: username.message })
+            }
 
             const expires = new Date(
                 new Date().setFullYear(new Date().getFullYear() + 1)
             )
 
-            res.setCookie('accessToken', accessToken, {
+            res.setCookie('accessToken', accessToken!, {
                 httpOnly: true,
                 path: '/',
                 sameSite: 'none',
@@ -83,7 +87,7 @@ const auth: FastifyPluginCallback = (app, _, done) => {
                 expires
             })
 
-            return await username
+            return username
         }
     )
 
