@@ -69,7 +69,7 @@ export const getHentai = async ({
     return collection.hentai.map(({ id }) => id)
 }
 
-export const getCollectionList = (userId: number) =>
+export const getCollectionList = (userId: number, batch = 1) =>
     prisma.user
         .findUnique({
             select: {
@@ -77,6 +77,8 @@ export const getCollectionList = (userId: number) =>
                     orderBy: {
                         id: 'desc'
                     },
+                    take: batchSize,
+                    skip: batchSize * (batch - 1),
                     select: {
                         id: true,
                         title: true,

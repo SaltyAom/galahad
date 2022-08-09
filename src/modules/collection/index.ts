@@ -84,12 +84,16 @@ const collection: FastifyPluginCallback = (app, _, done) => {
         }
     )
 
-    app.get(
-        '/list',
+    app.get<{
+        Params: {
+            batch: number
+        }
+    }>(
+        '/list/:batch',
         {
-            preHandler: authGuardHook
+            preHandler: [authGuardHook, intParam('batch')]
         },
-        ({ userId }) => getCollectionList(userId!)
+        ({ params: { batch }, userId }) => getCollectionList(userId!, batch)
     )
 
     app.get<GetHentaiStatusHandler>(
