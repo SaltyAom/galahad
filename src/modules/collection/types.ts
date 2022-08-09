@@ -48,27 +48,42 @@ export interface AddFavoriteHentaiByCollection extends RouteShorthandMethod {
 export interface AddHentaiHandler extends RouteShorthandMethod {
     Params: {
         collection: number
+        hentai: number
     }
-    Body: number[]
 }
+
+// export interface AddHentaisHandler extends RouteShorthandMethod {
+//     Params: {
+//         collection: number
+//     }
+//     Body: number[]
+// }
 
 export interface RemoveHentaiHandler extends RouteShorthandMethod {
     Params: {
         collection: number
+        hentai: number
     }
-    Body: number[]
 }
 
+// export interface RemoveHentaisHandler extends RouteShorthandMethod {
+//     Params: {
+//         collection: number
+//     }
+//     Body: number[]
+// }
+
 export interface UpdateHentaiOrderBody {
-    id: number
-    order: number
+    previous: number
+    current: number
+    next: number
 }
 
 export interface UpdateHentaiOrderHandler extends RouteShorthandMethod {
     Params: {
         collection: number
     }
-    Body: UpdateHentaiOrderBody[]
+    Body: UpdateHentaiOrderBody
 }
 
 export interface SetCollectionByHentaiBody {

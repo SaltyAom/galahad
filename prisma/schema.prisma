@@ -32,24 +32,28 @@ model Favorite {
 }
 
 model Collection {
-  id        Int                 @id @default(autoincrement()) @db.UnsignedMediumInt
+  id        Int                 @id @default(autoincrement()) @db.UnsignedInt
   uid       Int
   title     String              @db.TinyText
   detail    String              @db.TinyText
   created   DateTime            @default(now())
   updated   DateTime            @default(now())
   public    Boolean             @default(false)
-  hentai    HentaiCollection[]
+  hentai    CollectionHentai[]
   user      User                @relation(fields: [uid], references: [id])
 }
 
-model HentaiCollection {
-  order         Int         @unique @default(autoincrement())
-  id            Int
-  collectionId  Int
-  collection    Collection  @relation(fields: [collectionId], references: [id])
+model CollectionHentai {
+  id                  Int                 @id @default(autoincrement()) @db.UnsignedInt
+  hentaiId            Int
+  collectionId        Int
+  collection          Collection          @relation(fields: [collectionId], references: [id])
+  // ? Using Doubly Linked List for reorder sort
+  nextId              Int?                @unique
+  next                CollectionHentai?   @relation("link", fields: [nextId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  previous            CollectionHentai?   @relation("link")
 
-  @@id([id, collectionId])
+  @@unique([hentaiId, collectionId])
 }
 
 model Profile {

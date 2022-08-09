@@ -6,6 +6,8 @@ import type {
     UpdateHentaiOrderBody
 } from './types'
 
+import type { Prisma } from '@prisma/client'
+
 const batchSize = 25
 
 export const getCollection = async (id: number, userId: number | null) => {
@@ -14,7 +16,7 @@ export const getCollection = async (id: number, userId: number | null) => {
             hentai: {
                 take: batchSize,
                 orderBy: {
-                    order: 'asc'
+                    id: 'asc'
                 }
             }
         },
@@ -51,7 +53,7 @@ export const getHentai = async ({
                     id: true
                 },
                 orderBy: {
-                    order: 'asc'
+                    id: 'asc'
                 },
                 take: batchSize,
                 skip: batchSize * (batch - 1)
@@ -73,7 +75,7 @@ export const getCollectionList = (userId: number) =>
             select: {
                 collection: {
                     orderBy: {
-                        created: 'desc'
+                        id: 'desc'
                     },
                     select: {
                         id: true,
@@ -82,7 +84,7 @@ export const getCollectionList = (userId: number) =>
                         hentai: {
                             take: 1,
                             orderBy: {
-                                order: 'asc'
+                                id: 'asc'
                             },
                             select: {
                                 id: true
@@ -102,6 +104,25 @@ export const getCollectionList = (userId: number) =>
                     ...rest
                 })) ?? []
         )
+
+export const isHentaiInCollection = ({
+    hentaiId,
+    collectionId
+}: {
+    collectionId: number
+    hentaiId: number
+}) =>
+    prisma.collectionHentai.findUnique({
+        select: {
+            id: true
+        },
+        where: {
+            hentaiId_collectionId: {
+                collectionId,
+                hentaiId
+            }
+        }
+    })
 
 export const getHentaiStatusById = async (userId: number, hentaiId: number) => {
     const [favorite, user] = await prisma.$transaction([
@@ -126,7 +147,7 @@ export const getHentaiStatusById = async (userId: number, hentaiId: number) => {
                                 id: true
                             },
                             where: {
-                                id: hentaiId
+                                hentaiId
                             }
                         }
                     }
@@ -137,13 +158,6 @@ export const getHentaiStatusById = async (userId: number, hentaiId: number) => {
             }
         })
     ])
-
-    //     .then((r) =>
-    //     r?.collection.map(({ hentai, ...rest }) => ({
-    //         ...rest,
-    //         selected: !!hentai[0]
-    //     }))
-    // )
 
     return {
         isFavorite: favorite > 0,
@@ -160,8 +174,10 @@ export const getHentaiList = async (id: number, userId: number | null) => {
         include: {
             hentai: {
                 select: {
-                    id: true,
-                    order: true
+                    id: true
+                },
+                orderBy: {
+                    id: 'asc'
                 }
             }
         },
@@ -201,111 +217,292 @@ export const updateCollection = (
         }
     })
 
-export const addFavoriteHentaiByCollection = (
+export const addFavoriteHentaiByCollection = async (
     hentaiId: number,
     collectionIds: number[]
 ) =>
-    prisma.hentaiCollection.createMany({
-        data: collectionIds.map((collectionId) => ({
-            id: hentaiId,
-            collectionId
-        }))
+    prisma.$transaction(async (prisma) => {
+        await Promise.all(
+            collectionIds.map((collectionId) =>
+                addHentai(prisma, collectionId, hentaiId)
+            )
+        )
     })
 
-export const addHentais = (collectionId: number, hentaiIds: number[]) =>
-    prisma.hentaiCollection.createMany({
-        data: hentaiIds.map((id) => ({
-            id,
-            collectionId
-        }))
-    })
-
-export const removeHentais = (collectionId: number, hentaiIds: number[]) =>
-    prisma.hentaiCollection.deleteMany({
-        where: {
-            OR: hentaiIds.map((id) => ({
-                id,
-                collectionId
-            }))
-        }
-    })
-
-export const updateHentaiOrder = async (
+export const addHentai = async (
+    prisma: Prisma.TransactionClient,
     collectionId: number,
-    newCollection: UpdateHentaiOrderBody[]
+    hentaiId: number
 ) => {
-    const data = await prisma.collection.findUnique({
-        include: {
-            hentai: true
+    const latest = await prisma.collectionHentai.findFirst({
+        select: {
+            id: true
         },
         where: {
-            id: collectionId
+            collectionId
+        },
+        orderBy: {
+            id: 'desc'
+        },
+        take: 1
+    })
+
+    if (!latest) {
+        return void (await prisma.collectionHentai.create({
+            select: {
+                id: true
+            },
+            data: {
+                collectionId,
+                hentaiId
+            }
+        }))
+    }
+
+    await prisma.collectionHentai.update({
+        data: {
+            next: {
+                create: {
+                    collectionId,
+                    hentaiId
+                }
+            }
+        },
+        where: {
+            id: latest.id
+        }
+    })
+}
+
+export const removeHentai = async (
+    prisma: Prisma.TransactionClient,
+    collectionId: number,
+    hentaiId: number
+) => {
+    const latest = await prisma.collectionHentai.findUnique({
+        select: {
+            previous: {
+                select: {
+                    collectionId: true,
+                    id: true
+                }
+            },
+            next: {
+                select: {
+                    collectionId: true,
+                    id: true
+                }
+            }
+        },
+        where: {
+            hentaiId_collectionId: {
+                collectionId,
+                hentaiId
+            }
         }
     })
 
-    if (!data || !data.hentai.length) return []
+    if (!latest) return new Error("id doesn't existed")
 
-    const collection = data.hentai
-    const newIds = new Set(newCollection.map((x) => x.id))
-    const newOrders = new Set(newCollection.map((x) => x.order))
+    const { previous, next } = latest
 
-    if (
-        collection.length !== newIds.size ||
-        !collection.every(({ id }) => newIds.has(id))
-    )
-        return new Error('Ids not match')
-
-    if (
-        collection.length !== newOrders.size ||
-        !collection.every(({ order }) => newOrders.has(order))
-    )
-        return new Error('Order not matched')
-
-    await prisma.$transaction(async (prisma) => {
-        await prisma.hentaiCollection.deleteMany({
-            where: {
-                collectionId
+    const deleted = prisma.collectionHentai.delete({
+        where: {
+            hentaiId_collectionId: {
+                collectionId,
+                hentaiId
             }
-        })
-
-        await prisma.hentaiCollection.createMany({
-            data: newCollection.map(({ id, order }) => ({
-                id,
-                order,
-                collectionId
-            }))
-        })
+        }
     })
 
-    return newCollection.sort((a, b) => a.order - b.order)
-}
-
-export const setCollectionByHentai = async (
-    id: number,
-    { add: requestAdd, remove: requestRemove }: SetCollectionByHentaiBody
-) => {
-    try {
-        const [add, remove] = await prisma.$transaction([
-            prisma.hentaiCollection.createMany({
-                data: requestAdd.map((collectionId) => ({
-                    id,
-                    collectionId
-                }))
-            }),
-            prisma.hentaiCollection.deleteMany({
+    if (previous && next)
+        await Promise.all([
+            deleted,
+            prisma.collectionHentai.update({
+                data: {
+                    nextId: next.id
+                },
                 where: {
-                    OR: requestRemove.map((collectionId) => ({
-                        id,
-                        collectionId
-                    }))
+                    id: previous.id
                 }
             })
         ])
+    else if (previous && !next)
+        await Promise.all([
+            deleted,
+            prisma.collectionHentai.update({
+                data: {
+                    nextId: null
+                },
+                where: {
+                    id: previous.id
+                }
+            })
+        ])
+    else await deleted
+}
 
-        return {
-            add,
-            remove
-        }
+// export const addHentais = async (collectionId: number, hentaiIds: number[]) => {
+//     if (!hentaiIds[0]) return
+
+//     await prisma.$transaction(async (prisma) => {
+//         let latest = await prisma.collectionHentai.findFirst({
+//             select: {
+//                 id: true
+//             },
+//             orderBy: {
+//                 id: 'desc'
+//             },
+//             take: 1
+//         })
+
+//         if (!latest) {
+//             latest = await prisma.collectionHentai.create({
+//                 select: {
+//                     id: true
+//                 },
+//                 data: {
+//                     collectionId,
+//                     hentaiId: hentaiIds.shift()!
+//                 }
+//             })
+//         }
+
+//         const operation: Record<string, any> = {}
+//         let current = operation
+
+//         hentaiIds.forEach((id) => {
+//             current.next = {
+//                 create: {
+//                     collection: {
+//                         connect: {
+//                             id: collectionId
+//                         }
+//                     },
+//                     hentaiId: id
+//                 }
+//             }
+
+//             current = current.next.create
+//         })
+
+//         console.dir(operation, {
+//             depth: null
+//         })
+
+//         await prisma.collectionHentai.update({
+//             data: {
+//                 next: operation?.next ?? undefined
+//             },
+//             where: {
+//                 id: latest.id
+//             }
+//         })
+//     })
+
+//     return hentaiIds
+// }
+
+// export const removeHentais = (collectionId: number, hentaiIds: number[]) =>
+//     prisma.collectionHentai.deleteMany({
+//         where: {
+//             OR: hentaiIds.map((hentaiId) => ({
+//                 hentaiId,
+//                 collectionId
+//             }))
+//         }
+//     })
+
+export const updateHentaiOrder = async (
+    collectionId: number,
+    { previous, current, next }: UpdateHentaiOrderBody
+) => {
+    try {
+        prisma.$transaction(async (prisma) => {
+            const request = await prisma.collectionHentai.findUnique({
+                select: {
+                    previous: {
+                        select: {
+                            id: true
+                        }
+                    },
+                    next: {
+                        select: {
+                            id: true
+                        }
+                    }
+                },
+                where: {
+                    hentaiId_collectionId: {
+                        collectionId,
+                        hentaiId: current
+                    }
+                }
+            })
+
+            if (!request) throw new Error("Current doesn't existed")
+            const { previous: oldPrevious, next: oldNext } = request
+
+            await Promise.all([
+                prisma.collectionHentai.update({
+                    data: {
+                        nextId: current
+                    },
+                    where: {
+                        hentaiId_collectionId: {
+                            collectionId,
+                            hentaiId: previous
+                        }
+                    }
+                }),
+                prisma.collectionHentai.update({
+                    data: {
+                        nextId: next
+                    },
+                    where: {
+                        hentaiId_collectionId: {
+                            collectionId,
+                            hentaiId: current
+                        }
+                    }
+                }),
+                oldPrevious &&
+                    oldNext &&
+                    // Link old H to new H
+                    prisma.collectionHentai.update({
+                        data: {
+                            nextId: oldNext.id
+                        },
+                        where: {
+                            hentaiId_collectionId: {
+                                collectionId,
+                                hentaiId: oldPrevious.id
+                            }
+                        }
+                    })
+            ])
+        })
+    } catch (error) {
+        return error
+    }
+}
+
+// ? Used in 'add to list' page, to update multiple hentai
+export const setCollectionByHentai = async (
+    hentaiId: number,
+    { add, remove }: SetCollectionByHentaiBody
+) => {
+    try {
+        await prisma.$transaction(async (prisma) => {
+            await Promise.all([
+                ...add.map((collectionId) =>
+                    addHentai(prisma, collectionId, hentaiId)
+                ),
+                ...remove.map((collectionId) =>
+                    removeHentai(prisma, collectionId, hentaiId)
+                )
+            ])
+        })
     } catch (error) {
         return new Error('Something went wrong')
     }

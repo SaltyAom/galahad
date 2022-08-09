@@ -1,9 +1,9 @@
 import { FastifyPluginCallback } from 'fastify'
 
-import { authGuardHook, intParam, validateSchema } from '@services'
+import { authGuardHook, intParam, prisma, validateSchema } from '@services'
 import {
-    addHentais,
-    removeHentais,
+    // addHentais,
+    // removeHentais,
     createCollection,
     getCollection,
     getCollectionList,
@@ -12,8 +12,10 @@ import {
     updateCollection,
     updateHentaiOrder,
     getHentaiStatusById,
-    addFavoriteHentaiByCollection,
-    setCollectionByHentai
+    setCollectionByHentai,
+    addHentai,
+    removeHentai,
+    isHentaiInCollection
 } from './services'
 
 import { ownCollection } from './hooks'
@@ -21,8 +23,7 @@ import {
     createCollectionSchema,
     setCollectionByHentaiSchema,
     updateCollectionSchema,
-    updateHentaiOrderSchema,
-    updateHentaiSchema
+    updateHentaiOrderSchema
 } from './models'
 
 import type {
@@ -31,10 +32,8 @@ import type {
     CreateCollectionHandler,
     UpdateCollectionHandler,
     AddHentaiHandler,
-    RemoveHentaiHandler,
     UpdateHentaiOrderHandler,
     GetHentaiStatusHandler,
-    AddFavoriteHentaiByCollection,
     SetCollectionByHentaiHandler
 } from './types'
 
@@ -123,45 +122,117 @@ const collection: FastifyPluginCallback = (app, _, done) => {
         ({ params: { collection }, body }) => updateCollection(collection, body)
     )
 
-    app.put<AddFavoriteHentaiByCollection>(
-        '/hentai/:hentai',
-        {
-            preHandler: [
-                authGuardHook,
-                intParam('hentai'),
-                validateSchema(updateHentaiSchema),
-                ownCollection
-            ]
-        },
-        ({ params: { hentai }, body }) =>
-            addFavoriteHentaiByCollection(hentai, body)
-    )
-
     app.put<AddHentaiHandler>(
-        '/:collection/hentai',
+        '/:collection/hentai/:hentai',
         {
             preHandler: [
                 authGuardHook,
                 intParam('collection'),
-                validateSchema(updateHentaiSchema),
+                intParam('hentai'),
                 ownCollection
             ]
         },
-        ({ params: { collection }, body }) => addHentais(collection, body)
+        async (
+            { params: { collection: collectionId, hentai: hentaiId } },
+            res
+        ) => {
+            try {
+                await prisma.$transaction((prisma) =>
+                    addHentai(prisma, collectionId, hentaiId)
+                )
+
+                return {
+                    id: hentaiId
+                }
+            } catch (error) {
+                if (await isHentaiInCollection({ hentaiId, collectionId }))
+                    return res.status(400).send({
+                        error: 'Already in collection'
+                    })
+
+                return res.status(500).send({
+                    error: (error as Error).message ?? 'Something went wrong'
+                })
+            }
+        }
     )
 
-    app.delete<RemoveHentaiHandler>(
-        '/:collection/hentai',
+    app.delete<AddHentaiHandler>(
+        '/:collection/hentai/:hentai',
         {
             preHandler: [
                 authGuardHook,
                 intParam('collection'),
-                validateSchema(updateHentaiSchema),
+                intParam('hentai'),
                 ownCollection
             ]
         },
-        ({ params: { collection }, body }) => removeHentais(collection, body)
+        async (
+            { params: { collection: collectionId, hentai: hentaiId } },
+            res
+        ) => {
+            try {
+                const removed = await prisma.$transaction((prisma) =>
+                    removeHentai(prisma, collectionId, hentaiId)
+                )
+
+                if (removed instanceof Error)
+                    return res.status(400).send({
+                        error: removed.message
+                    })
+
+                return {
+                    id: hentaiId
+                }
+            } catch (error) {
+                return res.status(500).send({
+                    error: (error as Error).message ?? 'Something went wrong'
+                })
+            }
+        }
     )
+
+    // app.put<AddFavoriteHentaiByCollection>(
+    //     '/hentai/:hentai',
+    //     {
+    //         preHandler: [
+    //             authGuardHook,
+    //             intParam('hentai'),
+    //             validateSchema(updateHentaiSchema),
+    //             ownCollection
+    //         ]
+    //     },
+    //     ({ params: { hentai }, body }) =>
+    //         addFavoriteHentaiByCollection(hentai, body)
+    // )
+
+    // ? Bulk update cause link in-order bug
+    // app.put<AddHentaisHandler>(
+    //     '/:collection/hentai',
+    //     {
+    //         preHandler: [
+    //             authGuardHook,
+    //             intParam('collection'),
+    //             validateSchema(updateHentaiSchema),
+    //             ownCollection
+    //         ]
+    //     },
+    //     ({ params: { collection }, body }) => addHentais(collection, body)
+    // )
+
+    // ? Bulk update cause link in-order bug
+    // app.delete<RemoveHentaisHandler>(
+    //     '/:collection/hentai',
+    //     {
+    //         preHandler: [
+    //             authGuardHook,
+    //             intParam('collection'),
+    //             validateSchema(updateHentaiSchema),
+    //             ownCollection
+    //         ]
+    //     },
+    //     ({ params: { collection }, body }) => removeHentais(collection, body)
+    // )
 
     app.patch<UpdateHentaiOrderHandler>(
         '/:collection/order',
@@ -195,7 +266,7 @@ const collection: FastifyPluginCallback = (app, _, done) => {
                     error: 'Invalid body, please try again'
                 })
 
-            return response
+            return body
         }
     )
 
