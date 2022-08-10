@@ -37,7 +37,7 @@ model Collection {
   title     String              @db.TinyText
   detail    String              @db.TinyText
   created   DateTime            @default(now())
-  updated   DateTime            @default(now())
+  updated   DateTime            @updatedAt
   public    Boolean             @default(false)
   hentai    CollectionHentai[]
   user      User                @relation(fields: [uid], references: [id])

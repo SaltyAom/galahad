@@ -8,9 +8,10 @@ export const mutateAuthHook: onRequestHookHandler = async (req, res) => {
     const {
         cookies: { accessToken }
     } = req
-    if (!accessToken) return
 
+    if (!accessToken) return
     const { id, exists } = await verifyToken(accessToken)
+
     if (!exists) return res.unsignCookie('accessToken')
 
     req.auth = true

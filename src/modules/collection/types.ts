@@ -97,3 +97,9 @@ export interface SetCollectionByHentaiHandler extends RouteShorthandMethod {
     }
     Body: SetCollectionByHentaiBody
 }
+
+export interface DeleteCollectionHandler extends RouteShorthandMethod {
+    Params: {
+        collection: number
+    }
+}

@@ -58,6 +58,37 @@ export const removeFavorite = async (
 
 const batchSize = 25
 
+export const overviewStatus = async (uid: number) => {
+    try {
+        const status = await prisma.user.findUnique({
+            select: {
+                favorites: {
+                    select: {
+                        id: true
+                    },
+                    take: 1,
+                    orderBy: {
+                        id: 'desc'
+                    }
+                },
+                _count: {
+                    select: {
+                        collection: true,
+                        favorites: true
+                    }
+                }
+            },
+            where: {
+                id: uid
+            }
+        })
+
+        return status
+    } catch (err) {
+        return new Error('Something went wrong')
+    }
+}
+
 export const getFavoriteByPage = async (
     uid: number,
     page = 1
@@ -82,4 +113,3 @@ export const getFavoriteByPage = async (
         return new Error('Something went wrong')
     }
 }
-

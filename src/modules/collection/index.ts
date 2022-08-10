@@ -8,14 +8,15 @@ import {
     getCollection,
     getCollectionList,
     getHentai,
-    getHentaiList,
+    getHentaiPreview,
     updateCollection,
     updateHentaiOrder,
     getHentaiStatusById,
     setCollectionByHentai,
     addHentai,
     removeHentai,
-    isHentaiInCollection
+    isHentaiInCollection,
+    deleteCollection
 } from './services'
 
 import { ownCollection } from './hooks'
@@ -34,7 +35,8 @@ import type {
     AddHentaiHandler,
     UpdateHentaiOrderHandler,
     GetHentaiStatusHandler,
-    SetCollectionByHentaiHandler
+    SetCollectionByHentaiHandler,
+    DeleteCollectionHandler
 } from './types'
 
 const collection: FastifyPluginCallback = (app, _, done) => {
@@ -61,7 +63,7 @@ const collection: FastifyPluginCallback = (app, _, done) => {
             preHandler: [intParam('collection')]
         },
         ({ userId, params: { collection } }) =>
-            getHentaiList(collection, userId)
+            getHentaiPreview(collection, userId)
     )
 
     app.get<GetHentaiHandler>(
@@ -118,7 +120,6 @@ const collection: FastifyPluginCallback = (app, _, done) => {
             preHandler: [
                 authGuardHook,
                 intParam('collection'),
-                intParam('hentai'),
                 validateSchema(updateCollectionSchema),
                 ownCollection
             ]
@@ -271,6 +272,25 @@ const collection: FastifyPluginCallback = (app, _, done) => {
                 })
 
             return body
+        }
+    )
+
+    app.delete<DeleteCollectionHandler>(
+        '/:collection',
+        {
+            preHandler: [authGuardHook, intParam('collection'), ownCollection]
+        },
+        async ({ params: { collection } }, res) => {
+            const deleted = await deleteCollection(collection)
+
+            if (deleted instanceof Error)
+                return res.status(500).send({
+                    error: 'Something went wrong, please try again later'
+                })
+
+            return {
+                collection
+            }
         }
     )
 

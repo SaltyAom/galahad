@@ -5,7 +5,7 @@ specifiers:
   '@fastify/cors': ^8.0.0
   '@fastify/helmet': ^9.1.0
   '@fastify/static': ^6.4.1
-  '@prisma/client': ^4.2.0
+  '@prisma/client': ^4.2.1
   '@swc/cli': ^0.1.57
   '@swc/core': ^1.2.220
   '@swc/jest': ^0.2.22
@@ -24,7 +24,7 @@ specifiers:
   jest: ^27.5.1
   nanoid: ^3.3.4
   nodemon: ^2.0.19
-  prisma: ^4.2.0
+  prisma: ^4.2.1
   rimraf: ^3.0.2
   ts-node: ^10.9.1
   tsconfig-paths: ^3.14.1
@@ -35,7 +35,7 @@ dependencies:
   '@fastify/cors': 8.0.0
   '@fastify/helmet': 9.1.0
   '@fastify/static': 6.4.1
-  '@prisma/client': 4.2.0_prisma@4.2.0
+  '@prisma/client': 4.2.1_prisma@4.2.1
   argon2: 0.28.7
   dotenv: 14.3.2
   fastify: 4.3.0
@@ -56,7 +56,7 @@ devDependencies:
   eslint: 8.20.0
   jest: 27.5.1_ts-node@10.9.1
   nodemon: 2.0.19
-  prisma: 4.2.0
+  prisma: 4.2.1
   rimraf: 3.0.2
   ts-node: 10.9.1_eqxfaxddkxnjbwpu6yirp7atv4
   tsconfig-paths: 3.14.1
@@ -796,8 +796,8 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  /@prisma/client/4.2.0_prisma@4.2.0:
-    resolution: {integrity: sha512-Q/X8fi1UBufCrkdLk188sC/roiGxEm1V3qU4uEP5SyleO5n2A+FyC62S7+4I0hu57CU3c7Ls3YjqPiZyTHVGOw==}
+  /@prisma/client/4.2.1_prisma@4.2.1:
+    resolution: {integrity: sha512-PZBkY60+k5oix+e6IUfl3ub8TbRLNsPLdfWrdy2eh80WcHTaT+/UfvXf/B7gXedH7FRtbPFHZXk1hZenJiJZFQ==}
     engines: {node: '>=14.17'}
     requiresBuild: true
     peerDependencies:
@@ -807,15 +807,15 @@ packages:
         optional: true
     dependencies:
       '@prisma/engines-version': 4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826
-      prisma: 4.2.0
+      prisma: 4.2.1
     dev: false
 
   /@prisma/engines-version/4.2.0-33.2920a97877e12e055c1333079b8d19cee7f33826:
     resolution: {integrity: sha512-tktkqdiwqE4QhmE088boPt+FwPj1Jub/zk+5F6sEfcRHzO5yz9jyMD5HFVtiwxZPLx/8Xg9ElnuTi8E5lWVQFQ==}
     dev: false
 
-  /@prisma/engines/4.2.0:
-    resolution: {integrity: sha512-tefRwCVDwLqk0WrBLErYR26uKKxzLSlKvRyADFiQn/fizJhqk9nxMXH8F6SE4w6r/szUQTzIJ4vheJKQ4dYKpw==}
+  /@prisma/engines/4.2.1:
+    resolution: {integrity: sha512-0KqBwREUOjBiHwITsQzw2DWfLHjntvbqzGRawj4sBMnIiL5CXwyDUKeHOwXzKMtNr1rEjxEsypM14g0CzLRK3g==}
     requiresBuild: true
 
   /@sinonjs/commons/1.8.3:
@@ -3653,13 +3653,13 @@ packages:
       react-is: 17.0.2
     dev: true
 
-  /prisma/4.2.0:
-    resolution: {integrity: sha512-EswC2+mFi2oKQ/IDVkokDxwAsuiuYH4gKGkNNMAQ+86f3qwOo4tiVubCRxrQp5d61F+Yf+30f8Sv0zwWMnj0XQ==}
+  /prisma/4.2.1:
+    resolution: {integrity: sha512-HuYqnTDgH8atjPGtYmY0Ql9XrrJnfW7daG1PtAJRW0E6gJxc50lY3vrIDn0yjMR3TvRlypjTcspQX8DT+xD4Sg==}
     engines: {node: '>=14.17'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@prisma/engines': 4.2.0
+      '@prisma/engines': 4.2.1
 
   /process-warning/2.0.0:
     resolution: {integrity: sha512-+MmoAXoUX+VTHAlwns0h+kFUWFs/3FZy+ZuchkgjyOu3oioLAo2LB5aCfKPh2+P9O18i3m43tUEv3YqttSy0Ww==}

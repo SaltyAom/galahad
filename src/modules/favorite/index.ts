@@ -6,7 +6,8 @@ import {
     addFavorite,
     removeFavorite,
     getFavoriteByPage,
-    isFavorite
+    isFavorite,
+    overviewStatus
 } from './services'
 
 import type { GetFavoriteHandler, NewFavoriteHandler } from './types'
@@ -73,6 +74,25 @@ const base: FastifyPluginCallback = (app, _, done) => {
                 return res.status(502).send('Something went wrong')
 
             return favorites
+        }
+    )
+
+    app.get(
+        '/overview',
+        {
+            preHandler: [authGuardHook]
+        },
+        async ({ userId }, res) => {
+            const overview = await overviewStatus(userId!)
+            if (overview instanceof Error || !overview)
+                return res.status(502).send('Something went wrong')
+
+            const { favorites: [{ id }], ...rest } = overview
+
+            return {
+                ...rest,
+                cover: id
+            }
         }
     )
 
