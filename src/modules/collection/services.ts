@@ -70,6 +70,7 @@ const createLink = (deep: number) => {
 }
 
 const defaultLink = createLink(batchSize)
+const initialLink = createLink(batchSize - 1)
 
 const linkToArray = (link: LinkedData, includeInitial = false) => {
     const array: number[] = includeInitial ? [link.hentaiId] : []
@@ -105,7 +106,6 @@ export const getHentai = async ({
                           uid: true
                       }
                   },
-                  hentaiId: true,
                   next: defaultLink.next
               },
               where: {
@@ -124,7 +124,8 @@ export const getHentai = async ({
                       }
                   },
                   hentaiId: true,
-                  next: defaultLink.next
+                  // Because this will select itself, so it use initial link
+                  next: initialLink.next
               },
               where: {
                   previous: null,
