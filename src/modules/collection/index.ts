@@ -62,8 +62,16 @@ const collection: FastifyPluginCallback = (app, _, done) => {
         {
             preHandler: [intParam('collection')]
         },
-        ({ userId, params: { collection } }) =>
-            getHentaiPreview(collection, userId)
+        async ({ userId, params: { collection } }, res) => {
+            const preview = await getHentaiPreview(collection, userId)
+
+            if (preview instanceof Error)
+                return res.status(400).send({
+                    error: preview.message
+                })
+
+            return preview
+        }
     )
 
     app.get<GetInitialHentaiHandler>(
@@ -74,9 +82,9 @@ const collection: FastifyPluginCallback = (app, _, done) => {
         async ({ userId, params: { collection: collectionId } }, res) => {
             const hentai = await getHentai({ userId, collectionId })
 
-            if (!hentai)
-                return res.status(403).send({
-                    error: 'Invalid Ownership'
+            if (hentai instanceof Error)
+                return res.status(401).send({
+                    error: hentai.message
                 })
 
             return hentai

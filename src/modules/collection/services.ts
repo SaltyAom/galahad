@@ -135,7 +135,7 @@ export const getHentai = async ({
 
     if (!h) return Error("Invalid link or collection doesn't existed")
     if (!h.collection.public && h.collection.uid !== userId)
-        Error('Invalid ownership')
+        return Error('Invalid ownership')
 
     return linkToArray(h as unknown as LinkedData, !linkedId)
 }
@@ -266,7 +266,8 @@ export const getHentaiPreview = async (id: number, userId: number | null) => {
         }
     })
 
-    if (!collection || (!collection.public && collection.uid !== userId))
+    if (!collection) return new Error("Collection doesn't existed")
+    if (!collection.public && collection.uid !== userId)
         return new Error('Invalid ownership')
 
     const { uid, ...rest } = collection
