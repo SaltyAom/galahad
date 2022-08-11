@@ -40,43 +40,103 @@ export const getCollection = async (id: number, userId: number | null) => {
     }
 }
 
+interface LinkedRequest {
+    hentaiId: true
+    next?: {
+        select: LinkedRequest
+    }
+}
+
+interface LinkedData {
+    hentaiId: number
+    next?: LinkedData
+}
+
+const createLink = (deep: number) => {
+    const object = {}
+    let current = object as LinkedRequest
+
+    for (let i = 0; i < deep; i++) {
+        current.next = {
+            select: {
+                hentaiId: true
+            }
+        }
+
+        current = current.next.select
+    }
+
+    return object as unknown as LinkedRequest
+}
+
+const defaultLink = createLink(batchSize)
+
+const linkToArray = (link: LinkedData, includeInitial = false) => {
+    const array: number[] = includeInitial ? [link.hentaiId] : []
+
+    let next = link.next
+
+    while (next) {
+        const { hentaiId, next: newNext } = next
+
+        array.push(hentaiId)
+
+        next = newNext
+    }
+
+    return array
+}
+
 export const getHentai = async ({
     userId,
     collectionId,
-    batch = 1
+    linkedId
 }: {
     userId: number | null
     collectionId: number
-    batch?: number
+    linkedId?: number | undefined
 }) => {
-    const collection = await prisma.collection.findUnique({
-        select: {
-            uid: true,
-            public: true,
-            _count: {
-                select: {
-                    hentai: true
-                }
-            },
-            hentai: {
-                select: {
-                    hentaiId: true
-                },
-                orderBy: {
-                    id: 'asc'
-                },
-                take: batchSize,
-                skip: batchSize * (batch - 1)
-            }
-        },
-        where: {
-            id: collectionId
-        }
-    })
+    const h = await (linkedId
+        ? prisma.collectionHentai.findUnique({
+              select: {
+                  collection: {
+                      select: {
+                          public: true,
+                          uid: true
+                      }
+                  },
+                  hentaiId: true,
+                  next: defaultLink.next
+              },
+              where: {
+                  hentaiId_collectionId: {
+                      collectionId,
+                      hentaiId: linkedId
+                  }
+              }
+          })
+        : prisma.collectionHentai.findFirst({
+              select: {
+                  collection: {
+                      select: {
+                          public: true,
+                          uid: true
+                      }
+                  },
+                  hentaiId: true,
+                  next: defaultLink.next
+              },
+              where: {
+                  previous: null,
+                  collectionId
+              }
+          }))
 
-    if (!collection || (!collection.public && collection.uid !== userId)) return
+    if (!h) return Error("Invalid link or collection doesn't existed")
+    if (!h.collection.public && h.collection.uid !== userId)
+        Error('Invalid ownership')
 
-    return collection.hentai.map(({ hentaiId }) => hentaiId)
+    return linkToArray(h as unknown as LinkedData, !linkedId)
 }
 
 export const getCollectionList = (userId: number, batch = 1) =>
@@ -100,11 +160,11 @@ export const getCollectionList = (userId: number, batch = 1) =>
                         },
                         hentai: {
                             take: 1,
-                            orderBy: {
-                                id: 'asc'
-                            },
                             select: {
                                 hentaiId: true
+                            },
+                            where: {
+                                previous: null
                             }
                         }
                     }
@@ -199,28 +259,20 @@ export const getHentaiPreview = async (id: number, userId: number | null) => {
                     hentai: true
                 }
             }
-            // hentai: {
-            //     select: {
-            //         hentaiId: true
-            //     },
-            //     orderBy: {
-            //         id: 'asc'
-            //     },
-            //     take: 1
-            // }
         },
         where: {
             id
         }
     })
 
-    if (!collection || (!collection.public && collection.uid !== userId)) return
+    if (!collection || (!collection.public && collection.uid !== userId))
+        return new Error('Invalid ownership')
 
     const { uid, ...rest } = collection
 
     return {
         ...rest,
-        owned: uid === userId,
+        owned: uid === userId
     }
 }
 

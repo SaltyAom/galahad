@@ -5,7 +5,6 @@ import {
     // addHentais,
     // removeHentais,
     createCollection,
-    getCollection,
     getCollectionList,
     getHentai,
     getHentaiPreview,
@@ -29,36 +28,37 @@ import {
 
 import type {
     GetCollectionHandler,
-    GetHentaiHandler,
     CreateCollectionHandler,
     UpdateCollectionHandler,
     AddHentaiHandler,
     UpdateHentaiOrderHandler,
     GetHentaiStatusHandler,
     SetCollectionByHentaiHandler,
-    DeleteCollectionHandler
+    DeleteCollectionHandler,
+    GetLinkedHentaiHandler,
+    GetInitialHentaiHandler
 } from './types'
 
 const collection: FastifyPluginCallback = (app, _, done) => {
+    // app.get<GetCollectionHandler>(
+    //     '/:collection',
+    //     {
+    //         preHandler: intParam('collection')
+    //     },
+    //     async ({ params: { collection: id }, userId }, res) => {
+    //         const collection = await getCollection(id, userId)
+
+    //         if (!collection)
+    //             return res.status(403).send({
+    //                 error: 'Invalid Ownership'
+    //             })
+
+    //         return collection
+    //     }
+    // )
+
     app.get<GetCollectionHandler>(
-        '/:collection',
-        {
-            preHandler: intParam('collection')
-        },
-        async ({ params: { collection: id }, userId }, res) => {
-            const collection = await getCollection(id, userId)
-
-            if (!collection)
-                return res.status(403).send({
-                    error: 'Invalid Ownership'
-                })
-
-            return collection
-        }
-    )
-
-    app.get<GetCollectionHandler>(
-        '/:collection/hentai',
+        '/:collection/hentai/preview',
         {
             preHandler: [intParam('collection')]
         },
@@ -66,20 +66,37 @@ const collection: FastifyPluginCallback = (app, _, done) => {
             getHentaiPreview(collection, userId)
     )
 
-    app.get<GetHentaiHandler>(
-        '/:collection/hentai/:batch',
+    app.get<GetInitialHentaiHandler>(
+        '/:collection/hentai',
         {
-            preHandler: [intParam('collection'), intParam('batch')]
+            preHandler: [intParam('collection'), intParam('linkedId')]
         },
-        async (
-            { userId, params: { collection: collectionId, batch } },
-            res
-        ) => {
-            const hentai = await getHentai({ userId, collectionId, batch })
+        async ({ userId, params: { collection: collectionId } }, res) => {
+            const hentai = await getHentai({ userId, collectionId })
 
             if (!hentai)
                 return res.status(403).send({
                     error: 'Invalid Ownership'
+                })
+
+            return hentai
+        }
+    )
+
+    app.get<GetLinkedHentaiHandler>(
+        '/:collection/hentai/:linkedId',
+        {
+            preHandler: [intParam('collection'), intParam('linkedId')]
+        },
+        async (
+            { userId, params: { collection: collectionId, linkedId } },
+            res
+        ) => {
+            const hentai = await getHentai({ userId, collectionId, linkedId })
+
+            if (hentai instanceof Error)
+                return res.status(403).send({
+                    error: hentai.message
                 })
 
             return hentai

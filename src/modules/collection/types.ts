@@ -7,10 +7,16 @@ export interface GetCollectionHandler extends RouteShorthandMethod {
     }
 }
 
-export interface GetHentaiHandler extends RouteShorthandMethod {
+export interface GetLinkedHentaiHandler extends RouteShorthandMethod {
     Params: {
         collection: number
-        batch: number
+        linkedId: number
+    }
+}
+
+export interface GetInitialHentaiHandler extends RouteShorthandMethod {
+    Params: {
+        collection: number
     }
 }
 
